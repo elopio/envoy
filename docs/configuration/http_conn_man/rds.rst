@@ -12,7 +12,7 @@ fetch its own route table via the API.
   {
     "cluster": "{...}",
     "route_config_name": "...",
-    "refresh_interval_ms": "..."
+    "refresh_delay_ms": "..."
   }
 
 cluster
@@ -25,10 +25,10 @@ route_config_name
   :ref:`RDS HTTP API <config_http_conn_man_rds_api>` so that different route tables can be used by
   independent filters.
 
-refresh_interval_ms
+refresh_delay_ms
   *(optional, integer)* The delay, in milliseconds, between fetches to the RDS API. Envoy will add
-  an additional random jitter to the delay that is between zero and *refresh_interval_ms*
-  milliseconds. Thus the longest possible refresh delay is 2 \* *refresh_interval_ms*. Default
+  an additional random jitter to the delay that is between zero and *refresh_delay_ms*
+  milliseconds. Thus the longest possible refresh delay is 2 \* *refresh_delay_ms*. Default
   value is 30000ms (30 seconds).
 
 .. _config_http_conn_man_rds_api:
