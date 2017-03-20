@@ -46,6 +46,8 @@ parts:
       - gperftools
       - tclap
       - googletest
+      - boringssl
+      - c-ares
 
   cotire:
     source: https://github.com/sakra/cotire/archive/cotire-1.7.8.tar.gz
@@ -58,6 +60,7 @@ parts:
   protobuf:
     source: https://github.com/google/protobuf/releases/download/v3.0.0/protobuf-cpp-3.0.0.tar.gz
     plugin: autotools
+    build-packages: [g++]
 
   spdlog:
     source: https://github.com/gabime/spdlog/archive/v0.11.0.tar.gz
@@ -67,7 +70,7 @@ parts:
     after: [cotire]
 
   libevent:
-    source: https://github.com/libevent/libevent/releases/download/release-2.0.22-stable/libevent-2.0.22-stable.tar.gz
+    source: https://github.com/libevent/libevent/releases/download/release-2.1.8-stable/libevent-2.1.8-stable.tar.gz
     plugin: autotools
     configflags:
       - --enable-share=no
@@ -87,7 +90,7 @@ parts:
       cp http_parser.h $SNAPCRAFT_PART_INSTALL/include/
 
   lightstep:
-    source: https://github.com/lightstep/lightstep-tracer-cpp/releases/download/v0_19/lightstep-tracer-cpp-0.19.tar.gz
+    source: https://github.com/lightstep/lightstep-tracer-cpp/releases/download/v0_33/lightstep-tracer-cpp-0.33.tar.gz
     plugin: autotools
     configflags:
       - --disable-grpc
@@ -97,7 +100,7 @@ parts:
     after: [protobuf]
 
   nghttp2:
-    source: https://github.com/nghttp2/nghttp2/releases/download/v1.14.1/nghttp2-1.14.1.tar.gz
+    source: https://github.com/nghttp2/nghttp2/releases/download/v1.20.0/nghttp2-1.20.0.tar.gz
     plugin: autotools
     configflags:
       - --enable-shared=no
@@ -131,3 +134,14 @@ parts:
     plugin: cmake
     prime:
       - -*
+
+  boringssl:
+    source: https://boringssl.googlesource.com/boringssl
+    source-type: git
+    source-commit: b87c80300647c2c0311c1489a104470e099f1531
+    plugin: cmake
+    build-packages: [golang-go]
+
+  c-ares:
+    source: https://github.com/c-ares/c-ares/archive/cares-1_12_0.tar.gz
+    plugin: autotools
