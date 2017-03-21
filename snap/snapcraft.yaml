@@ -60,7 +60,9 @@ parts:
     source: http://www.netgull.com/gcc/releases/gcc-4.9.4/gcc-4.9.4.tar.gz
     plugin: autotools
     configflags: ['--enable-languages=c,c++']
-    build-packages: [libmpc-dev]
+    build-packages: [libmpc-dev, libc6-dev-i386, libgcc-4.8-dev, libgmp-dev, gcc-multilib, g++]
+    prime:
+      - -*
 
   cotire:
     source: https://github.com/sakra/cotire/archive/cotire-1.7.8.tar.gz
@@ -73,7 +75,7 @@ parts:
   protobuf:
     source: https://github.com/google/protobuf/releases/download/v3.0.0/protobuf-cpp-3.0.0.tar.gz
     plugin: autotools
-    build-packages: [gcc]
+    after: [gcc]
 
   spdlog:
     source: https://github.com/gabime/spdlog/archive/v0.11.0.tar.gz
