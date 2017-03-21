@@ -8,8 +8,6 @@ description: |
 grade: devel
 confinement: devmode
 
-build-packages: [binutils, gcc]
-
 apps:
   envoy:
     command: source/exe/envoy
@@ -20,8 +18,12 @@ parts:
     source: .
     plugin: cmake
     configflags:
-      - "-L"
+      - "-DENVOY_DEBUG:BOOL=OFF"
+      - "-DENVOY_STRIP:BOOL=ON"
+      - "-DCLANG-FORMAT:FILEPATH=clang-format"
+      - "-DCMAKE_CXX_FLAGS=-static-libstdc++"
       - "-DENVOY_COTIRE_MODULE_DIR:FILEPATH=$SNAPCRAFT_STAGE/cotire/CMake"
+      - "-DENVOY_PROTOBUF_INCLUDE_DIR:FILEPATH=$SNAPCRAFT_STAGE/include"
       - "-DENVOY_PROTOBUF_PROTOC:FILEPATH=$SNAPCRAFT_STAGE/bin/protoc"
       - "-DENVOY_SPDLOG_INCLUDE_DIR:FILEPATH=$SNAPCRAFT_STAGE/include"
       - "-DENVOY_LIBEVENT_INCLUDE_DIR:FILEPATH=$SNAPCRAFT_STAGE/include"
@@ -30,11 +32,16 @@ parts:
       - "-DENVOY_NGHTTP2_INCLUDE_DIR:FILEPATH=$SNAPCRAFT_STAGE/include"
       - "-DENVOY_RAPIDJSON_INCLUDE_DIR:FILEPATH=$SNAPCRAFT_STAGE/include"
       - "-DENVOY_GPERFTOOLS_INCLUDE_DIR:FILEPATH=$SNAPCRAFT_STAGE/include"
+      - "-DENVOY_GTEST_INCLUDE_DIR:FILEPATH=$SNAPCRAFT_STAGE/include"
       - "-DENVOY_TCLAP_INCLUDE_DIR:FILEPATH=$SNAPCRAFT_STAGE/include"
       - "-DENVOY_GMOCK_INCLUDE_DIR:FILEPATH=$SNAPCRAFT_STAGE/include"
+      - "-DENVOY_OPENSSL_INCLUDE_DIR:FILEPATH=$SNAPCRAFT_STAGE/include"
+      - "-DENVOY_EXE_EXTRA_LINKER_FLAGS:STRING=-L$SNAPCRAFT_STAGE/lib"
+    make-parameters: [envoy]
     artifacts:
       - source/exe/envoy
     after:
+      - gcc
       - cotire
       - protobuf
       - spdlog
@@ -49,6 +56,12 @@ parts:
       - boringssl
       - c-ares
 
+  gcc:
+    source: http://www.netgull.com/gcc/releases/gcc-4.9.4/gcc-4.9.4.tar.gz
+    plugin: autotools
+    configflags: ['--enable-languages=c,c++']
+    build-packages: [libmpc-dev]
+
   cotire:
     source: https://github.com/sakra/cotire/archive/cotire-1.7.8.tar.gz
     plugin: dump
@@ -60,7 +73,7 @@ parts:
   protobuf:
     source: https://github.com/google/protobuf/releases/download/v3.0.0/protobuf-cpp-3.0.0.tar.gz
     plugin: autotools
-    build-packages: [g++]
+    build-packages: [gcc]
 
   spdlog:
     source: https://github.com/gabime/spdlog/archive/v0.11.0.tar.gz
@@ -90,13 +103,14 @@ parts:
       cp http_parser.h $SNAPCRAFT_PART_INSTALL/include/
 
   lightstep:
-    source: https://github.com/lightstep/lightstep-tracer-cpp/releases/download/v0_33/lightstep-tracer-cpp-0.33.tar.gz
+    source: https://github.com/lightstep/lightstep-tracer-cpp/releases/download/v0_36/lightstep-tracer-cpp-0.36.tar.gz
     plugin: autotools
     configflags:
       - --disable-grpc
       - --enable-shared=no
       - protobuf_CFLAGS="-I$SNAPCRAFT_STAGE/include"
       - protobuf_LIBS="-L$SNAPCRAFT_STAGE/lib -lprotobuf"
+      - PROTOC=$SNAPCRAFT_STAGE/bin/protoc
     after: [protobuf]
 
   nghttp2:
@@ -141,7 +155,17 @@ parts:
     source-commit: b87c80300647c2c0311c1489a104470e099f1531
     plugin: cmake
     build-packages: [golang-go]
+    build: |
+      cmake .
+      make
+    install: |
+      mkdir -p $SNAPCRAFT_PART_INSTALL/include
+      mv include/openssl/ $SNAPCRAFT_PART_INSTALL/include/
+      mkdir $SNAPCRAFT_PART_INSTALL/lib
+      cp ssl/libssl.a $SNAPCRAFT_PART_INSTALL/lib
+      cp crypto/libcrypto.a $SNAPCRAFT_PART_INSTALL/lib
 
   c-ares:
     source: https://github.com/c-ares/c-ares/archive/cares-1_12_0.tar.gz
     plugin: autotools
+    configflags: ['CFLAGS=']
